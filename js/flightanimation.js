@@ -1,53 +1,6 @@
 $(function() {
   var OD_PAIRS = [
-    ["NRT", "JFK"],
-    ["SFO", "NRT"],
-    ["LAX", "HNL"],
-    ["HNL", "NRT"],
-    ["CDG", "JFK"],
-    ["NRT", "SYD"],
-    ["FCO", "PEK"],
-    ["LHR", "PVG"],
-    ["NRT", "ARN"],
-    ["LAX", "JFK"],
-    ["NRT", "DEL"],
-    ["DFW", "GRU"],
-    ["MAD", "ATL"],
-    ["ORD", "CAI"],
-    ["HKG", "CDG"],
-    ["LAS", "CDG"],
-    ["NRT", "SVO"],
-    ["DEN", "HNL"],
-    ["ORD", "LAX"],
-    ["SIN", "SEA"],
-    ["SYD", "PEK"],
-    ["CAI", "CPT"],
-    ["CUN", "JFK"],
-    ["ORD", "JFK"],
-    ["LHR", "BOM"],
-    ["LAX", "MEX"],
-    ["LHR", "CPT"],
-    ["PVG", "CGK"],
-    ["SYD", "BOM"],
-    ["JFK", "CPT"],
-    ["MAD", "GRU"],
-    ["EZE", "FCO"],
-    ["DEL", "DXB"],
-    ["DXB", "NRT"],
-    ["GRU", "MIA"],
-    ["SVO", "PEK"],
-    ["YYZ", "ARN"],
-    ["LHR", "YYC"],
-    ["HNL", "SEA"],
-    ["JFK", "EZE"],
-    ["EZE", "LAX"],
-    ["CAI", "HKG"],
-    ["SVO", "SIN"],
-    ["IST", "MCO"],
-    ["MCO", "LAX"],
-    ["FRA", "LAS"],
-    ["ORD", "FRA"],
-    ["MAD", "JFK"]
+    ["Singapore", "Los Angeles"]
   ];
 
   var currentWidth = $('#map').width();
@@ -56,8 +9,8 @@ $(function() {
 
   var projection = d3.geo
                      .mercator()
-                     .scale(150)
-                     .translate([width / 2, height / 1.41]);
+                     .scale(115)
+                     .translate([width / 2, height / 1.30]);
 
   var path = d3.geo
                .path()
@@ -71,12 +24,12 @@ $(function() {
               .attr("width", currentWidth)
               .attr("height", currentWidth * height / width);
 
-  var airportMap = {};
+  var cityMap = {};
 
   function transition(plane, route) {
     var l = route.node().getTotalLength();
     plane.transition()
-        .duration(l * 50)
+        .duration(l * 10)
         .attrTween("transform", delta(plane, route.node()))
         .each("end", function() { route.remove(); })
         .remove();
@@ -105,7 +58,7 @@ $(function() {
 
   function fly(origin, destination) {
     var route = svg.append("path")
-                   .datum({type: "LineString", coordinates: [airportMap[origin], airportMap[destination]]})
+                   .datum({type: "LineString", coordinates: [cityMap[origin], cityMap[destination]]})
                    .attr("class", "route")
                    .attr("d", path);
 
@@ -116,7 +69,7 @@ $(function() {
     transition(plane, route);
   }
 
-  function loaded(error, countries, airports) {
+  function loaded(error, countries, cities) {
     svg.append("g")
        .attr("class", "countries")
        .selectAll("path")
@@ -126,32 +79,32 @@ $(function() {
        .attr("d", path);
 
     svg.append("g")
-       .attr("class", "airports")
+       .attr("class", "cities")
        .selectAll("path")
-       .data(topojson.feature(airports, airports.objects.airports).features)
+       .data(topojson.feature(cities, cities.objects.cities).features)
        .enter()
        .append("path")
        .attr("id", function(d) {return d.id;})
        .attr("d", path);
 
-    var geos = topojson.feature(airports, airports.objects.airports).features;
+    var geos = topojson.feature(cities, cities.objects.cities).features;
     for (i in geos) {
-      airportMap[geos[i].id] = geos[i].geometry.coordinates;
+      cityMap[geos[i].id] = geos[i].geometry.coordinates;
     }
 
-    var i = 0;
-    setInterval(function() {
-      if (i > OD_PAIRS.length - 1) {
-        i = 0;
-      }
-      var od = OD_PAIRS[i];
-      fly(od[0], od[1]);
-      i++;
-    }, 150);
+    // var i = 0;
+    // setInterval(function() {
+    //   if (i > OD_PAIRS.length - 1) {
+    //     i = 0;
+    //   }
+    //   var od = OD_PAIRS[i];
+    //   fly(od[0], od[1]);
+    //   i++;
+    // }, 150);
   }
 
   queue().defer(d3.json, "/json/countries2.topo.json")
-         .defer(d3.json, "/json/airports2.topo.json")
+         .defer(d3.json, "/json/cities.topo.json")
          .await(loaded);
 
   $(window).resize(function() {
