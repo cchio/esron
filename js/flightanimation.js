@@ -1,6 +1,6 @@
 $(function() {
   var OD_PAIRS = [
-    ["Singapore", "Los Angeles"]
+    ["Singapore", "Los Angeles"],
   ];
 
   var currentWidth = $('#map').width();
@@ -14,7 +14,7 @@ $(function() {
 
   var path = d3.geo
                .path()
-               .pointRadius(2)
+               .pointRadius(1)
                .projection(projection);
   
   var svg = d3.select("#map")
@@ -92,18 +92,18 @@ $(function() {
       cityMap[geos[i].id] = geos[i].geometry.coordinates;
     }
 
-    // var i = 0;
     // setInterval(function() {
-    //   if (i > OD_PAIRS.length - 1) {
-    //     i = 0;
-    //   }
-    //   var od = OD_PAIRS[i];
-    //   fly(od[0], od[1]);
-    //   i++;
-    // }, 150);
+    //   fly("Singapore", "New York");
+    // }, 300);
+
+    var socket = io('http://localhost');
+    socket.on('news', function (data) {
+      console.log(data);
+      socket.emit('my other event', { my: 'data' });
+    });
   }
 
-  queue().defer(d3.json, "/json/countries2.topo.json")
+  queue().defer(d3.json, "/json/countries.topo.json")
          .defer(d3.json, "/json/cities.topo.json")
          .await(loaded);
 
