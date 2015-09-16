@@ -98,9 +98,21 @@ $(function() {
 
     var socket = io('http://localhost:3000');
     socket.on('attacks', function (data) {
-      console.log(data);
-      if (data['city'] in cityMap) {
-        fly(data['city'], "San Francisco");
+      // console.log(data);
+      if (data['city'] in cityMap && data['hq'] in cityMap) {
+        try {
+          fly(data['city'], data['hq']);
+        } catch (e) {
+          console.log(e);
+          return;
+        }
+      } else {
+        if (!(data['city'] in cityMap)) {
+          console.log(data['city'] + ' not in db');
+        }
+        if (!(data['hq'] in cityMap)) {
+          console.log(data['hq'] + ' not in db');
+        }
       }
     });
   }

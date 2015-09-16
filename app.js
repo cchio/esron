@@ -5,18 +5,25 @@ var io = require('socket.io')(server);
 
 require('./config.js');
 
-var kafka = require('kafka-node'),
-    HighLevelConsumer = kafka.HighLevelConsumer,
-    client = new kafka.Client(config['zkServer']),
-    consumer = new HighLevelConsumer(
-        client,
-        [
-            { topic: config['kafkaTopic'] }
-        ],
-        {
-            groupId: config['kafkaConsumerGroupId']
-        }
-    );
+var kafka;
+while (!kafka) {
+  try {
+    var kafka = require('kafka-node'),
+      HighLevelConsumer = kafka.HighLevelConsumer,
+      client = new kafka.Client(config['zkServer']),
+      consumer = new HighLevelConsumer(
+          client,
+          [
+              { topic: config['kafkaTopic'] }
+          ],
+          {
+              groupId: config['kafkaConsumerGroupId']
+          }
+      );
+  } catch (e) {
+    console.log(e);
+  }
+}
 
 if (typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function (str){
@@ -46,6 +53,12 @@ consumer.on('message', function (kafkaMsgObj) {
   if (i < 0) return;
 
   var cid = msgWithHeader.substring(1, i).split(',')[1];
+  if (!(cid in hqMap)) {
+    console.log(cid);
+    return;
+  }
+  var hq = hqMap[cid];
+
   var msg = msgWithHeader.substring(i+1);
   try {
     msgObj = JSON.parse(msg);
@@ -59,5 +72,5 @@ consumer.on('message', function (kafkaMsgObj) {
 
   var city = msgObj['geoip']['city_name'];
   if (!city || city == "null") return;
-  io.emit('attacks', {cid: cid, city: city})
+  io.emit('attacks', {hq: hq, city: city})
 });
