@@ -1,8 +1,4 @@
 $(function() {
-  var OD_PAIRS = [
-    ["Singapore", "Los Angeles"],
-  ];
-
   var currentWidth = $('#map').width();
   var width = 938;
   var height = 620;
@@ -91,10 +87,6 @@ $(function() {
     for (i in geos) {
       cityMap[geos[i].id] = geos[i].geometry.coordinates;
     }
-
-    // setInterval(function() {
-    //   fly("Chapel Hill", "San Francisco");
-    // }, 300);
 
     var socket = io('http://localhost:3000');
     socket.on('attacks', function (data) {
