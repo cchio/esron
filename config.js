@@ -1,0 +1,5 @@
+config = {
+  zkServer: '', 
+  kafkaTopic: '', 
+  kafkaConsumerGroupId: ''
+}
